@@ -240,6 +240,8 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         },
         (error) => {
           console.warn('Firestore bookings snapshot notice:', error.message);
+          setToastMessage(lang === 'ar' ? `⚠️ خطأ في مزامنة الحجوزات: ${error.message}` : `Sync Error: ${error.message}`);
+          setTimeout(() => setToastMessage(null), 5000);
         }
       );
 
