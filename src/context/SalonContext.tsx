@@ -8,7 +8,7 @@ import {
   onSnapshot, 
   getDocs 
 } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../firebase';
+import { db, handleFirestoreError, OperationType, cleanForFirestore } from '../firebase';
 import { 
   Language, 
   ViewPage, 
@@ -233,15 +233,38 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           const remoteBookings: Booking[] = [];
           snapshot.forEach((docSnap) => {
             const data = docSnap.data() as Booking;
-            remoteBookings.push(data);
+            if (data && data.id) {
+              remoteBookings.push(data);
+            }
           });
-          remoteBookings.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-          setBookings(remoteBookings);
+
+          setBookings((prevLocal) => {
+            const map = new Map<string, Booking>();
+            
+            // 1. Add all incoming remote bookings from Firestore
+            for (const b of remoteBookings) {
+              map.set(b.id, b);
+            }
+
+            // 2. Retain any local bookings that aren't yet in Firestore
+            // This prevents page refresh from wiping newly made bookings!
+            for (const localB of prevLocal) {
+              if (!map.has(localB.id)) {
+                map.set(localB.id, localB);
+                // Also proactively upload to Firestore so other devices get it
+                setDoc(doc(db, 'bookings', localB.id), cleanForFirestore(localB)).catch((err) => {
+                  console.warn('Syncing local booking to Firestore:', err);
+                });
+              }
+            }
+
+            const merged = Array.from(map.values());
+            merged.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            return merged;
+          });
         },
         (error) => {
           console.warn('Firestore bookings snapshot notice:', error.message);
-          setToastMessage(lang === 'ar' ? `⚠️ خطأ في مزامنة الحجوزات: ${error.message}` : `Sync Error: ${error.message}`);
-          setTimeout(() => setToastMessage(null), 5000);
         }
       );
 
@@ -251,9 +274,21 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         (snapshot) => {
           const remoteReviews: Review[] = [];
           snapshot.forEach((docSnap) => {
-            remoteReviews.push(docSnap.data() as Review);
+            const data = docSnap.data() as Review;
+            if (data && data.id) remoteReviews.push(data);
           });
-          setReviews(remoteReviews);
+
+          setReviews((prevLocal) => {
+            const map = new Map<string, Review>();
+            for (const r of remoteReviews) map.set(r.id, r);
+            for (const localR of prevLocal) {
+              if (!map.has(localR.id)) {
+                map.set(localR.id, localR);
+                setDoc(doc(db, 'reviews', localR.id), cleanForFirestore(localR)).catch(() => {});
+              }
+            }
+            return Array.from(map.values());
+          });
         },
         (error) => {
           console.warn('Firestore reviews snapshot notice:', error.message);
@@ -266,9 +301,21 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         (snapshot) => {
           const remoteClients: ClientProfile[] = [];
           snapshot.forEach((docSnap) => {
-            remoteClients.push(docSnap.data() as ClientProfile);
+            const data = docSnap.data() as ClientProfile;
+            if (data && data.id) remoteClients.push(data);
           });
-          setClients(remoteClients);
+
+          setClients((prevLocal) => {
+            const map = new Map<string, ClientProfile>();
+            for (const c of remoteClients) map.set(c.id, c);
+            for (const localC of prevLocal) {
+              if (!map.has(localC.id)) {
+                map.set(localC.id, localC);
+                setDoc(doc(db, 'clients', localC.id), cleanForFirestore(localC)).catch(() => {});
+              }
+            }
+            return Array.from(map.values());
+          });
         },
         (error) => {
           console.warn('Firestore clients snapshot notice:', error.message);
@@ -329,9 +376,10 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return updated;
     });
 
-    // Write to Firestore
+    // Write to Firestore with cleaned data
     try {
-      setDoc(doc(db, 'bookings', newBooking.id), newBooking).catch((err) => {
+      const cleaned = cleanForFirestore(newBooking);
+      setDoc(doc(db, 'bookings', newBooking.id), cleaned).catch((err) => {
         console.warn('Firestore booking persist notice:', err);
       });
     } catch (err) {
@@ -366,7 +414,7 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
       try {
         localStorage.setItem(`${STORAGE_KEY}_clients`, JSON.stringify(updatedClients));
-        setDoc(doc(db, 'clients', targetClient.id), targetClient).catch(() => {});
+        setDoc(doc(db, 'clients', targetClient.id), cleanForFirestore(targetClient)).catch(() => {});
       } catch (e) {
         console.error('Failed to persist clients', e);
       }
@@ -399,7 +447,7 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
     setReviews((prev) => [newRev, ...prev]);
     try {
-      setDoc(doc(db, 'reviews', newRev.id), newRev).catch(() => {});
+      setDoc(doc(db, 'reviews', newRev.id), cleanForFirestore(newRev)).catch(() => {});
     } catch {}
     showToast(lang === 'ar' ? 'شكراً لك! تم إضافة تقييمك بنجاح' : 'Thank you! Review submitted successfully');
   };
