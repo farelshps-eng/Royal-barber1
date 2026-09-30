@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously } from 'firebase/auth';
 import { 
-  getFirestore, 
+  initializeFirestore, 
   doc, 
   getDocFromServer,
   collection,
@@ -15,11 +15,35 @@ import {
 import firebaseConfig from '../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId); /* CRITICAL: The app will break without this line */
+export const db = initializeFirestore(app, {
+  ignoreUndefinedProperties: true
+}, firebaseConfig.firestoreDatabaseId); /* CRITICAL: The app will break without this line */
 export const auth = getAuth(app);
 
-// Authenticate anonymously so we can read/write if rules require it
-signInAnonymously(auth).catch((error) => console.warn('Anonymous auth failed:', error));
+// Authenticate anonymously if supported, catch silently if not configured
+signInAnonymously(auth).catch(() => {});
+
+/**
+ * Strips undefined values recursively so Firestore never complains about undefined properties
+ */
+export function cleanForFirestore<T>(data: T): T {
+  if (data === undefined || data === null) {
+    return null as unknown as T;
+  }
+  if (Array.isArray(data)) {
+    return data.map((item) => cleanForFirestore(item)) as unknown as T;
+  }
+  if (typeof data === 'object') {
+    const cleaned: Record<string, any> = {};
+    for (const [key, value] of Object.entries(data)) {
+      if (value !== undefined) {
+        cleaned[key] = cleanForFirestore(value);
+      }
+    }
+    return cleaned as T;
+  }
+  return data;
+}
 
 export enum OperationType {
   CREATE = 'create',
