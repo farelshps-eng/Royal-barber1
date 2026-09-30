@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-arabic: 'Cairo', system-ui, -apple-system, sans-serif;
+    --font-cinzel: 'Cinzel', serif;
+    --font-latin: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+
+  body {
+    font-family: var(--font-arabic);
+    overflow-x: hidden;
+    background-color: #0b0c10;
+    color: #e8eaed;
+  }
+
+  [dir="ltr"] body {
+    font-family: var(--font-latin);
+  }
+
+  .font-display {
+    font-family: var(--font-cinzel);
+  }
+
+  .font-ar {
+    font-family: var(--font-arabic);
+  }
+}
+
+/* Custom Luxury Gradients & Textures */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #F8E7B4 0%, #D4AF37 50%, #AA7C11 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-silver-gradient {
+  background: linear-gradient(135deg, #FFFFFF 0%, #B0B5BD 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.bg-gold-gradient {
+  background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+}
+
+.bg-gold-subtle {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.12) 0%, rgba(212, 175, 55, 0.03) 100%);
+}
+
+.border-gold-glow {
+  border-color: rgba(212, 175, 55, 0.35);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.08);
+}
+
+/* Subtle luxury noise/grid background overlay */
+.bg-luxury-pattern {
+  background-image: radial-gradient(rgba(212, 175, 55, 0.06) 1px, transparent 0);
+  background-size: 32px 32px;
+}
+
+/* Custom sleek scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0b0c10;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #252830;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d4af37;
+}
