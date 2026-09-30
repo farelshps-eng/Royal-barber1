@@ -1,0 +1,8 @@
+{
+  "name": "ROYAL BARBER",
+  "description": "تجربة حلاقة وعناية رجالية ملكية فاخرة مع حجز فوري متعدد المراحل ولوحة إدارة متكاملة.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,54 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isValidString(val, minLen, maxLen) {
+      return val is string && val.size() >= minLen && val.size() <= maxLen;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Connection test document
+    match /test/{docId} {
+      allow read, write: if true;
+    }
+
+    // Bookings collection
+    match /bookings/{bookingId} {
+      allow read: if true;
+      allow create: if isValidId(bookingId) 
+        && request.resource.data.customerName is string 
+        && request.resource.data.customerName.size() >= 2
+        && request.resource.data.customerPhone is string
+        && request.resource.data.referenceNumber is string;
+      allow update: if isValidId(bookingId)
+        && request.resource.data.status in ['confirmed', 'completed', 'cancelled'];
+      allow delete: if isValidId(bookingId);
+    }
+
+    // Reviews collection
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isValidId(reviewId)
+        && request.resource.data.authorNameAr is string
+        && request.resource.data.authorNameAr.size() >= 2
+        && request.resource.data.rating is number
+        && request.resource.data.rating >= 1 
+        && request.resource.data.rating <= 5;
+      allow update, delete: if isValidId(reviewId);
+    }
+
+    // Clients CRM collection
+    match /clients/{clientId} {
+      allow read: if true;
+      allow write: if isValidId(clientId);
+    }
+  }
+}

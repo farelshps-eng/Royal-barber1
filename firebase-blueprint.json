@@ -1,0 +1,211 @@
+{
+  "entities": {
+    "Booking": {
+      "title": "Booking",
+      "description": "Customer appointment reservation in Royal Barber salon",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique booking identifier"
+        },
+        "referenceNumber": {
+          "type": "string",
+          "description": "Human-readable booking reference number, e.g. RB-2026-1234"
+        },
+        "customerName": {
+          "type": "string",
+          "description": "Client full name",
+          "minLength": 2,
+          "maxLength": 100
+        },
+        "customerPhone": {
+          "type": "string",
+          "description": "Client phone number",
+          "minLength": 6,
+          "maxLength": 20
+        },
+        "customerEmail": {
+          "type": "string",
+          "description": "Optional client email address"
+        },
+        "confirmationMethod": {
+          "type": "string",
+          "enum": ["whatsapp", "email", "both"],
+          "description": "Preferred confirmation channel"
+        },
+        "serviceId": {
+          "type": "string",
+          "description": "Selected service ID"
+        },
+        "serviceNameAr": {
+          "type": "string",
+          "description": "Arabic service title"
+        },
+        "serviceNameEn": {
+          "type": "string",
+          "description": "English service title"
+        },
+        "barberId": {
+          "type": "string",
+          "description": "Selected barber ID or 'any'"
+        },
+        "barberNameAr": {
+          "type": "string",
+          "description": "Arabic barber name"
+        },
+        "barberNameEn": {
+          "type": "string",
+          "description": "English barber name"
+        },
+        "date": {
+          "type": "string",
+          "description": "Booking date in YYYY-MM-DD format"
+        },
+        "timeSlot": {
+          "type": "string",
+          "description": "Time slot in HH:MM format"
+        },
+        "totalPrice": {
+          "type": "number",
+          "description": "Total price in Libyan Dinars (LYD)"
+        },
+        "totalDurationMinutes": {
+          "type": "number",
+          "description": "Total duration in minutes"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["confirmed", "completed", "cancelled"],
+          "description": "Current status of appointment"
+        },
+        "vipNotes": {
+          "type": "string",
+          "description": "Special VIP requests or beverage preference"
+        },
+        "paymentMethod": {
+          "type": "string",
+          "enum": ["pay_at_salon", "online_deposit"],
+          "description": "Payment method chosen"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp or server creation time"
+        }
+      },
+      "required": ["referenceNumber", "customerName", "customerPhone", "serviceId", "date", "timeSlot", "totalPrice", "status"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "Customer feedback and review",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique review ID"
+        },
+        "authorNameAr": {
+          "type": "string",
+          "description": "Customer Arabic name",
+          "minLength": 2,
+          "maxLength": 100
+        },
+        "authorNameEn": {
+          "type": "string",
+          "description": "Customer English name"
+        },
+        "rating": {
+          "type": "number",
+          "description": "Rating score between 1 and 5"
+        },
+        "commentAr": {
+          "type": "string",
+          "description": "Review comment in Arabic",
+          "minLength": 3,
+          "maxLength": 1000
+        },
+        "commentEn": {
+          "type": "string",
+          "description": "Review comment in English"
+        },
+        "date": {
+          "type": "string",
+          "description": "Review date"
+        },
+        "verifiedBooking": {
+          "type": "boolean",
+          "description": "Whether reviewer has a verified appointment"
+        },
+        "serviceNameAr": {
+          "type": "string",
+          "description": "Service name in Arabic"
+        },
+        "serviceNameEn": {
+          "type": "string",
+          "description": "Service name in English"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["approved", "pending"],
+          "description": "Approval status"
+        }
+      },
+      "required": ["authorNameAr", "rating", "commentAr", "status"]
+    },
+    "ClientProfile": {
+      "title": "ClientProfile",
+      "description": "Client profile record for CRM tracking",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Client ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Client name"
+        },
+        "phone": {
+          "type": "string",
+          "description": "Client phone"
+        },
+        "email": {
+          "type": "string",
+          "description": "Client email"
+        },
+        "totalBookings": {
+          "type": "number",
+          "description": "Total completed appointments"
+        },
+        "totalSpent": {
+          "type": "number",
+          "description": "Total amount spent in LYD"
+        },
+        "lastVisit": {
+          "type": "string",
+          "description": "Last visit date"
+        },
+        "vipTier": {
+          "type": "string",
+          "enum": ["Gold", "Platinum", "Royal Diamond"],
+          "description": "Loyalty tier"
+        }
+      },
+      "required": ["name", "phone", "totalBookings", "vipTier"]
+    }
+  },
+  "firestore": {
+    "/bookings/{bookingId}": {
+      "schema": "Booking",
+      "description": "Customer reservations and bookings"
+    },
+    "/reviews/{reviewId}": {
+      "schema": "Review",
+      "description": "Customer reviews and feedback"
+    },
+    "/clients/{clientId}": {
+      "schema": "ClientProfile",
+      "description": "Customer CRM profiles"
+    }
+  }
+}
