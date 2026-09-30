@@ -230,15 +230,13 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       unsubBookings = onSnapshot(
         bookingsCol,
         (snapshot) => {
-          if (!snapshot.empty) {
-            const remoteBookings: Booking[] = [];
-            snapshot.forEach((docSnap) => {
-              const data = docSnap.data() as Booking;
-              remoteBookings.push(data);
-            });
-            remoteBookings.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-            setBookings(remoteBookings);
-          }
+          const remoteBookings: Booking[] = [];
+          snapshot.forEach((docSnap) => {
+            const data = docSnap.data() as Booking;
+            remoteBookings.push(data);
+          });
+          remoteBookings.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          setBookings(remoteBookings);
         },
         (error) => {
           console.warn('Firestore bookings snapshot notice:', error.message);
@@ -249,13 +247,11 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       unsubReviews = onSnapshot(
         reviewsCol,
         (snapshot) => {
-          if (!snapshot.empty) {
-            const remoteReviews: Review[] = [];
-            snapshot.forEach((docSnap) => {
-              remoteReviews.push(docSnap.data() as Review);
-            });
-            setReviews(remoteReviews);
-          }
+          const remoteReviews: Review[] = [];
+          snapshot.forEach((docSnap) => {
+            remoteReviews.push(docSnap.data() as Review);
+          });
+          setReviews(remoteReviews);
         },
         (error) => {
           console.warn('Firestore reviews snapshot notice:', error.message);
@@ -266,13 +262,11 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       unsubClients = onSnapshot(
         clientsCol,
         (snapshot) => {
-          if (!snapshot.empty) {
-            const remoteClients: ClientProfile[] = [];
-            snapshot.forEach((docSnap) => {
-              remoteClients.push(docSnap.data() as ClientProfile);
-            });
-            setClients(remoteClients);
-          }
+          const remoteClients: ClientProfile[] = [];
+          snapshot.forEach((docSnap) => {
+            remoteClients.push(docSnap.data() as ClientProfile);
+          });
+          setClients(remoteClients);
         },
         (error) => {
           console.warn('Firestore clients snapshot notice:', error.message);
